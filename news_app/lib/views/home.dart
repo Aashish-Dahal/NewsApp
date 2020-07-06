@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:newsapp/helper/data.dart';
 import 'package:newsapp/helper/news.dart';
 import 'package:newsapp/model/article_model.dart';
 import 'package:newsapp/model/category_model.dart';
+import 'package:newsapp/views/article_view.dart';
+import 'package:newsapp/views/category_news.dart';
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -52,7 +55,7 @@ class _HomeState extends State<Home> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            children: [
+            children:<Widget> [
               ///Categories
               Container(
                 height: 70,
@@ -71,17 +74,22 @@ class _HomeState extends State<Home> {
               ),
               ///Blogs
               Container(
+                height: MediaQuery.of(context).size.height-160,
+                width: MediaQuery.of(context).size.width,
                 child: ListView.builder(
+                  physics: ClampingScrollPhysics(),
                   itemCount: article.length,
-                    scrollDirection: Axis.vertical,
+                   scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemBuilder: (context,index){
                     return BlogTile(
                       imageUrl: article[index].urlToImage,
                       title: article[index].title,
                       desc: article[index].description,
+                      url: article[index].url,
                     );
-                    }),
+                    }
+                    ),
               )
             ],
           ),
@@ -91,8 +99,8 @@ class _HomeState extends State<Home> {
   }
 }
 class CategoryTile extends StatelessWidget {
-  final imageurl;
-  final  categoryName;
+  final String imageurl;
+  final String categoryName;
 
   const CategoryTile({Key key, this.imageurl, this.categoryName}) : super(key: key);
 
@@ -100,7 +108,7 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-
+           Navigator.push(context, MaterialPageRoute(builder: (context)=>CategoryNews(category: categoryName.toLowerCase(),)));
       },
       child: Container(
         margin: EdgeInsets.only(right: 16),
@@ -108,7 +116,7 @@ class CategoryTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-                child: Image.network(imageurl,width: 120,height: 60,fit: BoxFit.cover,)),
+                child: CachedNetworkImage(imageUrl: imageurl,width: 120,height: 60,fit: BoxFit.cover,)),
             Container(
               width: 120,height: 60,
            alignment: Alignment.center,
@@ -130,18 +138,34 @@ class CategoryTile extends StatelessWidget {
   }
 }
 class BlogTile extends StatelessWidget {
-  final String imageUrl,title,desc;
+  final String imageUrl,title,desc,url;
 
-  const BlogTile({Key key, this.imageUrl, this.title, this.desc}) : super(key: key);
+  const BlogTile({Key key, this.imageUrl, this.title, this.desc, this.url}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Image.network(imageUrl),
-          Text(title),
-          Text(desc)
-        ],
+    return GestureDetector(
+      onTap:(){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>ArticleView(imageUrl: url)));
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16),
+        child: Column(
+          children:<Widget> [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+                child: Image.network(imageUrl)),
+            SizedBox(height: 8,),
+            Text(title,style: TextStyle(
+              fontSize: 17,
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),),
+            SizedBox(height: 8,),
+            Text(desc,style: TextStyle(
+              color: Colors.black54,
+            ),),
+          ],
+        ),
       ),
     );
   }
